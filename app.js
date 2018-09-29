@@ -3,7 +3,10 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const ejs = require('ejs');
 const path = require('path');
+const models = require('./models');
+const sequelize = require('sequelize');
 
+const Resources = models.Resources;
 
 // // Set Storage Engine
 // const storage = multer.diskStorage({
@@ -139,13 +142,18 @@ app.get('/', (req, res) => {
 // });
 
 
-app.post('/upload', upload.single('myImage'), (req, res) => {
-    console.log(req.file);
-    let result = {
-        name: req.body.name,
-        u_name: req.body.u_name,
+app.post('/upload', upload.single('resourceImage'), (req, res) => {
+    let record = {
+        resourceName: req.body.name,
+        resourceType: req.body.type,
+        resourceImage: req.file.filename
     };
-    res.json(result);
+    Resources.create(record);
+    res.json(record);
 });
 
-app.listen(port, () => console.log(`Server started on port ${port}`));
+
+models.sequelize.sync().then(function () {
+    console.log('Tables are created');
+    app.listen(port, () => console.log(`Server started on port ${port}`));
+});
